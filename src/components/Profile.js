@@ -1,6 +1,6 @@
 import React from "react";
 
-const Profile = ({ user }) => {
+const Profile = ({ user, onLogout }) => {
   if (!user) return null;
 
   return (
@@ -9,8 +9,10 @@ const Profile = ({ user }) => {
       <p><strong>Name:</strong> {user.name}</p>
       <p><strong>Gender:</strong> {user.gender}</p>
       <p><strong>Age:</strong> {user.age}</p>
-      <p><strong>Number of Bikes:</strong> {user.bikeCount}</p>
-      <p><strong>Mobile Number:</strong> {user.mobile}</p>
+      <p><strong>Mobile:</strong> {user.mobile}</p>
+      <p><strong>Total Bikes:</strong> {user.bikeCount}</p>
+
+      <button onClick={onLogout}>🚪 Log Out</button>
     </div>
   );
 };

@@ -10,6 +10,7 @@ import Mileage from "./components/Mileage";
 const App = () => {
   const [user, setUser] = useState(null);
   const [screen, setScreen] = useState("signin");
+  const [bikeRefresh, setBikeRefresh] = useState(false); // 👈 new state
 
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem("user"));
@@ -34,9 +35,8 @@ const App = () => {
     localStorage.removeItem("user");
   };
 
-  const handleBikeAdd = () => {
-    // Optional: reload data or give feedback
-    console.log("Bike added");
+  const refreshBikes = () => {
+    setBikeRefresh((prev) => !prev); // 👈 toggle state to trigger refresh
   };
 
   return (
@@ -54,9 +54,9 @@ const App = () => {
 
           <Profile user={user} />
           <hr />
-          <AddBike onAdd={handleBikeAdd} />
+          <AddBike onAdd={refreshBikes} /> {/* 👈 pass refresh function */}
           <hr />
-          <BikeDetails />
+          <BikeDetails refresh={bikeRefresh} /> {/* 👈 trigger on refresh */}
           <hr />
           <PetrolPump />
           <hr />

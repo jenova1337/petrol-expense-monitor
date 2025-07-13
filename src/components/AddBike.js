@@ -19,7 +19,14 @@ const AddBike = ({ onAdd }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!bike.name || !bike.model || !bike.kilometers || !bike.purchaseDate || !bike.color || !bike.regNumber) {
+    if (
+      !bike.name ||
+      !bike.model ||
+      !bike.kilometers ||
+      !bike.purchaseDate ||
+      !bike.color ||
+      !bike.regNumber
+    ) {
       alert("Please fill all required fields.");
       return;
     }
@@ -28,7 +35,8 @@ const AddBike = ({ onAdd }) => {
     existing.push(bike);
     localStorage.setItem("bikes", JSON.stringify(existing));
     alert("✅ Bike added!");
-    onAdd();
+
+    if (onAdd) onAdd(); // ✅ safe check for onAdd to prevent crash
   };
 
   return (

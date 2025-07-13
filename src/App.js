@@ -4,13 +4,14 @@ import Signin from "./components/Signin";
 import Profile from "./components/Profile";
 import AddBike from "./components/AddBike";
 import BikeDetails from "./components/BikeDetails";
+import ReserveDetails from "./components/ReserveDetails";
 import PetrolPump from "./components/PetrolPump";
 import Mileage from "./components/Mileage";
+import Summary from "./components/Summary";
 
 const App = () => {
   const [user, setUser] = useState(null);
   const [screen, setScreen] = useState("signin");
-  const [bikeRefresh, setBikeRefresh] = useState(false); // 👈 new state
 
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem("user"));
@@ -35,8 +36,9 @@ const App = () => {
     localStorage.removeItem("user");
   };
 
-  const refreshBikes = () => {
-    setBikeRefresh((prev) => !prev); // 👈 toggle state to trigger refresh
+  const handleBikeAdd = () => {
+    // callback after adding bike
+    console.log("Bike added.");
   };
 
   return (
@@ -54,13 +56,23 @@ const App = () => {
 
           <Profile user={user} />
           <hr />
-          <AddBike onAdd={refreshBikes} /> {/* 👈 pass refresh function */}
+
+          <AddBike onAdd={handleBikeAdd} />
           <hr />
-          <BikeDetails refresh={bikeRefresh} /> {/* 👈 trigger on refresh */}
+
+          <BikeDetails />
           <hr />
+
+          <ReserveDetails />
+          <hr />
+
           <PetrolPump />
           <hr />
+
           <Mileage />
+          <hr />
+
+          <Summary />
         </>
       )}
 

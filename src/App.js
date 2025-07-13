@@ -34,6 +34,11 @@ const App = () => {
     localStorage.removeItem("user");
   };
 
+  const handleBikeAdd = () => {
+    // Optional: reload data or give feedback
+    console.log("Bike added");
+  };
+
   return (
     <div style={{ fontFamily: "sans-serif", padding: "20px" }}>
       {screen === "signup" && <Signup onSignup={handleSignup} />}
@@ -49,7 +54,7 @@ const App = () => {
 
           <Profile user={user} />
           <hr />
-          <AddBike />
+          <AddBike onAdd={handleBikeAdd} />
           <hr />
           <BikeDetails />
           <hr />

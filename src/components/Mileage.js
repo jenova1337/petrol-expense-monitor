@@ -1,45 +1,82 @@
-import React, { useState, useEffect } from "react";
+// src/components/Mileage.js
+import React, { useEffect, useState } from "react";
 
 const Mileage = () => {
-  const [mileage, setMileage] = useState(null);
+  const [mileageLogs, setMileageLogs] = useState([]);
 
   useEffect(() => {
     const reserves = JSON.parse(localStorage.getItem("reserveLogs")) || [];
     const petrols = JSON.parse(localStorage.getItem("petrolLogs")) || [];
 
-    const all = [
-      ...reserves.map(r => ({ type: "reserve", date: new Date(r.date), km: parseFloat(r.km) })),
-      ...petrols.map(p => ({ type: "petrol", date: new Date(p.date), km: parseFloat(p.km), liters: parseFloat(p.liters) }))
-    ].sort((a, b) => a.date - b.date);
+    const sortedReserves = reserves.map(r => ({ ...r, type: "reserve" }));
+    const sortedPetrols = petrols.map(p => ({ ...p, type: "petrol" }));
+    const all = [...sortedReserves, ...sortedPetrols].sort(
+      (a, b) => new Date(a.date) - new Date(b.date)
+    );
 
-    let A = null, B = null, C = null, L = null;
+    const logs = [];
+    for (let i = 0; i < all.length - 2; i++) {
+      if (
+        all[i].type === "reserve" &&
+        all[i + 1].type === "petrol" &&
+        all[i + 2].type === "reserve"
+      ) {
+        const beforeReserve = all[i];
+        const petrol = all[i + 1];
+        const afterReserve = all[i + 2];
 
-    for (let i = 0; i < all.length; i++) {
-      if (all[i].type === "reserve") {
-        if (!A) A = all[i];
-        else if (B && !C) {
-          C = all[i];
-          break;
-        }
-      } else if (A && !B && all[i].type === "petrol") {
-        B = all[i];
-        L = all[i].liters;
+        const distance = afterReserve.km - beforeReserve.km;
+        const mileage = petrol.liters ? (distance / petrol.liters).toFixed(2) : "N/A";
+
+        logs.push({
+          date: new Date(afterReserve.date).toLocaleString(),
+          bike: petrol.bike,
+          beforeReserveKm: beforeReserve.km,
+          petrolKm: petrol.km,
+          afterReserveKm: afterReserve.km,
+          liters: petrol.liters,
+          mileage,
+        });
       }
     }
 
-    if (A && B && C && L) {
-      const result = ((C.km - A.km) / L).toFixed(2);
-      setMileage(result);
-    }
+    setMileageLogs(logs);
   }, []);
 
   return (
-    <div style={{ padding: 20 }}>
+    <div>
       <h3>📊 Mileage Report</h3>
-      {mileage ? (
-        <p><strong>🛵 Mileage:</strong> {mileage} km/l</p>
-      ) : (
+      {mileageLogs.length === 0 ? (
         <p>No mileage data to show. Add at least Reserve → Petrol → Reserve.</p>
+      ) : (
+        <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Date</th>
+              <th>Bike</th>
+              <th>Before Reserve (Km)</th>
+              <th>Petrol Fill (Km)</th>
+              <th>After Reserve (Km)</th>
+              <th>Litres</th>
+              <th>Mileage (Km/L)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {mileageLogs.map((entry, idx) => (
+              <tr key={idx}>
+                <td>{idx + 1}</td>
+                <td>{entry.date}</td>
+                <td>{entry.bike}</td>
+                <td>{entry.beforeReserveKm}</td>
+                <td>{entry.petrolKm}</td>
+                <td>{entry.afterReserveKm}</td>
+                <td>{entry.liters}</td>
+                <td>{entry.mileage}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

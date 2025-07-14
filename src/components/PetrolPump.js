@@ -1,59 +1,70 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const PetrolPump = () => {
+  const [bike, setBike] = useState("");
   const [rate, setRate] = useState("");
   const [amount, setAmount] = useState("");
-  const [bike, setBike] = useState("");
-  const [km, setKm] = useState("");
+  const [currentKm, setCurrentKm] = useState("");
+  const [bikes, setBikes] = useState([]);
+  const [logs, setLogs] = useState([]);
 
-  const bikes = JSON.parse(localStorage.getItem("bikes") || "[]");
+  useEffect(() => {
+    const savedBikes = JSON.parse(localStorage.getItem("bikes")) || [];
+    setBikes(savedBikes);
+
+    const savedLogs = JSON.parse(localStorage.getItem("petrolLogs")) || [];
+    setLogs(savedLogs);
+  }, []);
 
   const handleSave = () => {
-    if (!bike || !rate || !amount || !km) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    const litres = parseFloat(amount) / parseFloat(rate);
-    const log = {
+    const litres = (parseFloat(amount) / parseFloat(rate)).toFixed(2);
+    const newLog = {
+      date: new Date().toLocaleString(),
       bike,
-      rate: parseFloat(rate),
-      amount: parseFloat(amount),
-      litres: parseFloat(litres.toFixed(2)),
-      km: parseInt(km),
-      date: new Date().toLocaleDateString()
+      rate,
+      amount,
+      litres,
+      currentKm,
     };
-
-    const existing = JSON.parse(localStorage.getItem("petrolLogs") || "[]");
-    existing.push(log);
-    localStorage.setItem("petrolLogs", JSON.stringify(existing));
-
-    alert("Petrol entry saved!");
+    const updatedLogs = [...logs, newLog];
+    setLogs(updatedLogs);
+    localStorage.setItem("petrolLogs", JSON.stringify(updatedLogs));
+    alert("✅ Petrol log saved!");
+    setBike("");
     setRate("");
     setAmount("");
-    setKm("");
+    setCurrentKm("");
   };
 
   return (
     <div>
       <h3>⛽ Petrol Pump Log</h3>
-      <label>Select Bike</label><br />
       <select value={bike} onChange={(e) => setBike(e.target.value)}>
-        <option value="">-- Select --</option>
+        <option value="">Select Bike</option>
         {bikes.map((b, i) => (
-          <option key={i} value={b.name}>{b.name}</option>
+          <option key={i} value={b.name}>
+            {b.name}
+          </option>
         ))}
-      </select><br /><br />
-
-      <label>Petrol Rate ₹</label><br />
-      <input type="number" value={rate} onChange={(e) => setRate(e.target.value)} /><br /><br />
-
-      <label>Amount ₹</label><br />
-      <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} /><br /><br />
-
-      <label>Current KM in Meter</label><br />
-      <input type="number" value={km} onChange={(e) => setKm(e.target.value)} /><br /><br />
-
+      </select>
+      <input
+        type="number"
+        placeholder="Petrol Rate ₹"
+        value={rate}
+        onChange={(e) => setRate(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Amount ₹"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Current KM"
+        value={currentKm}
+        onChange={(e) => setCurrentKm(e.target.value)}
+      />
       <button onClick={handleSave}>Save</button>
     </div>
   );

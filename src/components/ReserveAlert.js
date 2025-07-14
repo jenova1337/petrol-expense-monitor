@@ -3,87 +3,65 @@ import React, { useState, useEffect } from "react";
 const ReserveAlert = () => {
   const [reserveKm, setReserveKm] = useState("");
   const [alertTime, setAlertTime] = useState("6");
-  const [history, setHistory] = useState([]);
+  const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("reserve_alerts")) || [];
-    setHistory(saved);
+    const savedLogs = JSON.parse(localStorage.getItem("reserveLogs")) || [];
+    setLogs(savedLogs);
   }, []);
 
   const handleSave = () => {
-    if (!reserveKm || isNaN(reserveKm)) {
-      alert("❗ Please enter a valid Reserve KM.");
-      return;
-    }
-
-    const newEntry = {
-      reserveKm,
-      alertTime,
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString(),
+    const newLog = {
+      date: new Date().toLocaleString(),
+      km: reserveKm,
     };
 
-    const updated = [newEntry, ...history];
-    localStorage.setItem("reserve_alerts", JSON.stringify(updated));
-    setHistory(updated);
+    const updatedLogs = [...logs, newLog];
+    setLogs(updatedLogs);
+    localStorage.setItem("reserveLogs", JSON.stringify(updatedLogs));
+    localStorage.setItem("alertTime", alertTime);
+    alert("✅ Reserve KM & Alert saved!");
     setReserveKm("");
-    alert("✅ Reserve alert saved!");
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div>
       <h3>🔔 Reserve Details & Alert</h3>
-
       <input
         type="number"
-        placeholder="Reserve Kilometers"
+        placeholder="Reserve KM"
         value={reserveKm}
         onChange={(e) => setReserveKm(e.target.value)}
-        style={{ padding: 8, marginBottom: 10, width: "100%", maxWidth: 300 }}
       />
       <br />
-
       <label>Alert me after: </label>
-      <select
-        value={alertTime}
-        onChange={(e) => setAlertTime(e.target.value)}
-        style={{ marginLeft: 10, padding: 6 }}
-      >
+      <select value={alertTime} onChange={(e) => setAlertTime(e.target.value)}>
         <option value="6">6 hrs</option>
         <option value="12">12 hrs</option>
         <option value="24">24 hrs</option>
       </select>
-      <br /><br />
+      <br />
+      <button onClick={handleSave}>Save Reserve Alert</button>
 
-      <button onClick={handleSave} style={{ padding: "10px 20px" }}>
-        Save Reserve Alert
-      </button>
-
-      {history.length > 0 && (
-        <div style={{ marginTop: 30 }}>
-          <h4>📋 Reserve History</h4>
-          <table border="1" cellPadding="8" style={{ borderCollapse: "collapse", width: "100%", maxWidth: 600 }}>
-            <thead>
-              <tr style={{ background: "#ddd" }}>
-                <th>S.No</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Reserve KM</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((entry, idx) => (
-                <tr key={idx}>
-                  <td>{history.length - idx}</td>
-                  <td>{entry.date}</td>
-                  <td>{entry.time}</td>
-                  <td>{entry.reserveKm}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <h4>📋 Reserve Log</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Date</th>
+            <th>KM</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logs.map((log, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>{log.date}</td>
+              <td>{log.km}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

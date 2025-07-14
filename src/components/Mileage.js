@@ -1,52 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const Mileage = () => {
-  const [logs, setLogs] = useState([]);
+  const [reserveLogs, setReserveLogs] = useState([]);
+  const [petrolLogs, setPetrolLogs] = useState([]);
+  const [mileage, setMileage] = useState(null);
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("petrol_logs") || "[]");
-    setLogs(data);
-  }, []);
+    const reserves = JSON.parse(localStorage.getItem("reserveLogs")) || [];
+    const petrols = JSON.parse(localStorage.getItem("petrolLogs")) || [];
 
-  const calculateMileage = () => {
-    const result = [];
-    for (let i = 1; i < logs.length; i++) {
-      if (logs[i].bike === logs[i - 1].bike) {
-        const kmDiff = logs[i].kilometer - logs[i - 1].kilometer;
-        const mileage = kmDiff / logs[i - 1].liter;
-        result.push({
-          date: logs[i].date,
-          bike: logs[i].bike,
-          mileage: mileage.toFixed(2),
-          km: kmDiff,
-        });
+    const sortedEvents = [
+      ...reserves.map((r) => ({ type: "reserve", ...r })),
+      ...petrols.map((p) => ({ type: "petrol", ...p })),
+    ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    let A = null, B = null, C = null, L = null;
+
+    for (let i = 0; i < sortedEvents.length; i++) {
+      if (sortedEvents[i].type === "reserve") {
+        if (!A) {
+          A = parseFloat(sortedEvents[i].km);
+        } else if (B && !C) {
+          C = parseFloat(sortedEvents[i].km);
+          break;
+        }
+      } else if (A && !B && sortedEvents[i].type === "petrol") {
+        B = parseFloat(sortedEvents[i].currentKm);
+        L = parseFloat(sortedEvents[i].litres);
       }
     }
-    return result;
-  };
 
-  const data = calculateMileage();
+    if (A !== null && B !== null && C !== null && L) {
+      const calculated = ((C - A) / L).toFixed(2);
+      setMileage(calculated);
+    }
+  }, []);
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>📊 Mileage Report</h2>
-      {data.length === 0 && <p>No mileage data to show.</p>}
-      {data.map((m, index) => (
-        <div
-          key={index}
-          style={{
-            marginBottom: 10,
-            padding: 10,
-            border: "1px solid #ccc",
-            borderRadius: 10,
-          }}
-        >
-          <p><strong>Bike:</strong> {m.bike}</p>
-          <p><strong>Date:</strong> {m.date}</p>
-          <p><strong>Distance Travelled:</strong> {m.km} km</p>
-          <p><strong>Mileage:</strong> {m.mileage} km/l</p>
-        </div>
-      ))}
+    <div>
+      <h3>📊 Mileage Report</h3>
+      {mileage ? (
+        <p>
+          Mileage: <strong>{mileage} km/l</strong>
+        </p>
+      ) : (
+        <p>No mileage data to show. Add at least Reserve → Petrol → Reserve.</p>
+      )}
     </div>
   );
 };

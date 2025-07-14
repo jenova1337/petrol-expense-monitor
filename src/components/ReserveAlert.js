@@ -3,11 +3,11 @@ import React, { useState, useEffect } from "react";
 const ReserveAlert = () => {
   const [reserveKm, setReserveKm] = useState("");
   const [alertTime, setAlertTime] = useState("6");
-  const [savedReserve, setSavedReserve] = useState(null);
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("reserve_alert"));
-    if (saved) setSavedReserve(saved);
+    const saved = JSON.parse(localStorage.getItem("reserve_alerts")) || [];
+    setHistory(saved);
   }, []);
 
   const handleSave = () => {
@@ -16,15 +16,17 @@ const ReserveAlert = () => {
       return;
     }
 
-    const data = {
+    const newEntry = {
       reserveKm,
       alertTime,
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
     };
 
-    localStorage.setItem("reserve_alert", JSON.stringify(data));
-    setSavedReserve(data);
+    const updated = [newEntry, ...history];
+    localStorage.setItem("reserve_alerts", JSON.stringify(updated));
+    setHistory(updated);
+    setReserveKm("");
     alert("✅ Reserve alert saved!");
   };
 
@@ -57,13 +59,29 @@ const ReserveAlert = () => {
         Save Reserve Alert
       </button>
 
-      {savedReserve && (
-        <div style={{ marginTop: 20, background: "#f0f0f0", padding: 10, borderRadius: 5 }}>
-          <h4>✅ Saved Reserve Info</h4>
-          <p>📅 Date: <strong>{savedReserve.date}</strong></p>
-          <p>⏰ Time: <strong>{savedReserve.time}</strong></p>
-          <p>🔢 Reserve KM: <strong>{savedReserve.reserveKm} km</strong></p>
-          <p>⏳ Alert After: <strong>{savedReserve.alertTime} hrs</strong></p>
+      {history.length > 0 && (
+        <div style={{ marginTop: 30 }}>
+          <h4>📋 Reserve History</h4>
+          <table border="1" cellPadding="8" style={{ borderCollapse: "collapse", width: "100%", maxWidth: 600 }}>
+            <thead>
+              <tr style={{ background: "#ddd" }}>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Reserve KM</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map((entry, idx) => (
+                <tr key={idx}>
+                  <td>{history.length - idx}</td>
+                  <td>{entry.date}</td>
+                  <td>{entry.time}</td>
+                  <td>{entry.reserveKm}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

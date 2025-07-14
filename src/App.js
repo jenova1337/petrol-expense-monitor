@@ -4,7 +4,6 @@ import Signin from "./components/Signin";
 import Profile from "./components/Profile";
 import AddBike from "./components/AddBike";
 import BikeDetails from "./components/BikeDetails";
-import ReserveDetails from "./components/ReserveDetails";
 import PetrolPump from "./components/PetrolPump";
 import Mileage from "./components/Mileage";
 import Summary from "./components/Summary";
@@ -12,6 +11,7 @@ import Summary from "./components/Summary";
 const App = () => {
   const [user, setUser] = useState(null);
   const [screen, setScreen] = useState("signin");
+  const [bikes, setBikes] = useState([]);
 
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem("user"));
@@ -19,6 +19,8 @@ const App = () => {
       setUser(savedUser);
       setScreen("dashboard");
     }
+    const savedBikes = JSON.parse(localStorage.getItem("bikes") || "[]");
+    setBikes(savedBikes);
   }, []);
 
   const handleSignup = () => {
@@ -36,9 +38,9 @@ const App = () => {
     localStorage.removeItem("user");
   };
 
-  const handleBikeAdd = () => {
-    // callback after adding bike
-    console.log("Bike added.");
+  const handleBikeAdded = () => {
+    const updatedBikes = JSON.parse(localStorage.getItem("bikes") || "[]");
+    setBikes(updatedBikes);
   };
 
   return (
@@ -56,23 +58,15 @@ const App = () => {
 
           <Profile user={user} />
           <hr />
-
-          <AddBike onAdd={handleBikeAdd} />
+          <AddBike onAdd={handleBikeAdded} />
           <hr />
-
-          <BikeDetails />
+          <BikeDetails bikes={bikes} />
           <hr />
-
-          <ReserveDetails />
+          <PetrolPump bikes={bikes} />
           <hr />
-
-          <PetrolPump />
+          <Mileage bikes={bikes} />
           <hr />
-
-          <Mileage />
-          <hr />
-
-          <Summary />
+          <Summary bikes={bikes} />
         </>
       )}
 
@@ -96,3 +90,4 @@ const App = () => {
 };
 
 export default App;
+

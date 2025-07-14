@@ -11,31 +11,35 @@ const ReserveAlert = () => {
   }, []);
 
   const handleSave = () => {
-    const newLog = {
+    const newEntry = {
       date: new Date().toLocaleString(),
       km: reserveKm,
     };
-
-    const updatedLogs = [...logs, newLog];
-    setLogs(updatedLogs);
-    localStorage.setItem("reserveLogs", JSON.stringify(updatedLogs));
+    const updated = [...logs, newEntry];
+    localStorage.setItem("reserveLogs", JSON.stringify(updated));
     localStorage.setItem("alertTime", alertTime);
-    alert("✅ Reserve KM & Alert saved!");
+    setLogs(updated);
+    alert("✅ Reserve alert saved!");
     setReserveKm("");
   };
 
   return (
-    <div>
+    <div style={{ padding: 20 }}>
       <h3>🔔 Reserve Details & Alert</h3>
       <input
         type="number"
-        placeholder="Reserve KM"
+        placeholder="Reserve Kilometers"
         value={reserveKm}
         onChange={(e) => setReserveKm(e.target.value)}
+        style={{ marginBottom: 10 }}
       />
       <br />
       <label>Alert me after: </label>
-      <select value={alertTime} onChange={(e) => setAlertTime(e.target.value)}>
+      <select
+        value={alertTime}
+        onChange={(e) => setAlertTime(e.target.value)}
+        style={{ marginBottom: 10 }}
+      >
         <option value="6">6 hrs</option>
         <option value="12">12 hrs</option>
         <option value="24">24 hrs</option>
@@ -43,13 +47,13 @@ const ReserveAlert = () => {
       <br />
       <button onClick={handleSave}>Save Reserve Alert</button>
 
-      <h4>📋 Reserve Log</h4>
-      <table>
+      <h4 style={{ marginTop: 20 }}>📋 Reserve Log</h4>
+      <table border="1" cellPadding="5">
         <thead>
           <tr>
             <th>S.No</th>
             <th>Date</th>
-            <th>KM</th>
+            <th>Reserve KM</th>
           </tr>
         </thead>
         <tbody>

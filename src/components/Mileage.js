@@ -1,48 +1,43 @@
 import React, { useState, useEffect } from "react";
 
 const Mileage = () => {
-  const [reserveLogs, setReserveLogs] = useState([]);
-  const [petrolLogs, setPetrolLogs] = useState([]);
   const [mileage, setMileage] = useState(null);
 
   useEffect(() => {
     const reserves = JSON.parse(localStorage.getItem("reserveLogs")) || [];
     const petrols = JSON.parse(localStorage.getItem("petrolLogs")) || [];
 
-    const sortedEvents = [
-      ...reserves.map((r) => ({ type: "reserve", ...r })),
-      ...petrols.map((p) => ({ type: "petrol", ...p })),
-    ].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const all = [
+      ...reserves.map(r => ({ type: "reserve", date: new Date(r.date), km: parseFloat(r.km) })),
+      ...petrols.map(p => ({ type: "petrol", date: new Date(p.date), km: parseFloat(p.km), liters: parseFloat(p.liters) }))
+    ].sort((a, b) => a.date - b.date);
 
     let A = null, B = null, C = null, L = null;
 
-    for (let i = 0; i < sortedEvents.length; i++) {
-      if (sortedEvents[i].type === "reserve") {
-        if (!A) {
-          A = parseFloat(sortedEvents[i].km);
-        } else if (B && !C) {
-          C = parseFloat(sortedEvents[i].km);
+    for (let i = 0; i < all.length; i++) {
+      if (all[i].type === "reserve") {
+        if (!A) A = all[i];
+        else if (B && !C) {
+          C = all[i];
           break;
         }
-      } else if (A && !B && sortedEvents[i].type === "petrol") {
-        B = parseFloat(sortedEvents[i].currentKm);
-        L = parseFloat(sortedEvents[i].litres);
+      } else if (A && !B && all[i].type === "petrol") {
+        B = all[i];
+        L = all[i].liters;
       }
     }
 
-    if (A !== null && B !== null && C !== null && L) {
-      const calculated = ((C - A) / L).toFixed(2);
-      setMileage(calculated);
+    if (A && B && C && L) {
+      const result = ((C.km - A.km) / L).toFixed(2);
+      setMileage(result);
     }
   }, []);
 
   return (
-    <div>
+    <div style={{ padding: 20 }}>
       <h3>📊 Mileage Report</h3>
       {mileage ? (
-        <p>
-          Mileage: <strong>{mileage} km/l</strong>
-        </p>
+        <p><strong>🛵 Mileage:</strong> {mileage} km/l</p>
       ) : (
         <p>No mileage data to show. Add at least Reserve → Petrol → Reserve.</p>
       )}

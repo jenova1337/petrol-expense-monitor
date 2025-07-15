@@ -1,60 +1,34 @@
 import React, { useEffect, useState } from "react";
 
 const Mileage = () => {
-  const [log, setLog] = useState(null); // Store only the latest valid log
+  const [log, setLog] = useState(null);
 
   useEffect(() => {
     const reserves = JSON.parse(localStorage.getItem("reserveLogs")) || [];
     const petrols = JSON.parse(localStorage.getItem("petrolLogs")) || [];
 
-    // Convert all date strings to real Date objects and tag type
-    const taggedReserves = reserves.map(r => ({
-      ...r,
-      type: "reserve",
-      dateObj: new Date(r.date),
-      km: parseFloat(r.km)
-    }));
+    const all = [
+      ...reserves.map(r => ({ ...r, type: "reserve", km: parseFloat(r.km), date: new Date(r.date) })),
+      ...petrols.map(p => ({ ...p, type: "petrol", litres: parseFloat(p.litres), km: parseFloat(p.km), date: new Date(p.date) }))
+    ].sort((a, b) => a.date - b.date);
 
-    const taggedPetrols = petrols.map(p => ({
-      ...p,
-      type: "petrol",
-      dateObj: new Date(p.date),
-      litres: parseFloat(p.litres),
-      km: parseFloat(p.km)
-    }));
+    for (let i = 0; i < all.length - 2; i++) {
+      const a = all[i];
+      const b = all[i + 1];
+      const c = all[i + 2];
 
-    const allLogs = [...taggedReserves, ...taggedPetrols].sort(
-      (a, b) => a.dateObj - b.dateObj
-    );
-
-    let latest = null;
-
-    for (let i = 0; i < allLogs.length - 2; i++) {
-      const first = allLogs[i];
-      const second = allLogs[i + 1];
-      const third = allLogs[i + 2];
-
-      if (
-        first.type === "reserve" &&
-        second.type === "petrol" &&
-        third.type === "reserve"
-      ) {
-        const distance = third.km - first.km;
-        const mileage =
-          second.litres && distance > 0
-            ? (distance / second.litres).toFixed(2)
-            : "N/A";
-
-        latest = {
-          beforeReserveKm: first.km,
-          petrolLitres: second.litres,
-          afterReserveKm: third.km,
-          mileage,
-        };
+      if (a.type === "reserve" && b.type === "petrol" && c.type === "reserve") {
+        const distance = c.km - a.km;
+        const mileage = (distance / b.litres).toFixed(2);
+        setLog({
+          beforeReserveKm: a.km,
+          petrolLitres: b.litres,
+          afterReserveKm: c.km,
+          mileage
+        });
+        break;
       }
     }
-
-    setLog(latest);
   }, []);
 
   return (

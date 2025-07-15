@@ -1,44 +1,60 @@
 import React, { useEffect, useState } from "react";
 
 const Mileage = () => {
-  const [log, setLog] = useState(null); // Only one latest mileage log
+  const [log, setLog] = useState(null); // Store only the latest valid log
 
   useEffect(() => {
     const reserves = JSON.parse(localStorage.getItem("reserveLogs")) || [];
     const petrols = JSON.parse(localStorage.getItem("petrolLogs")) || [];
 
-    // Sort all by date
-    const sortedReserves = reserves.map(r => ({ ...r, type: "reserve", date: new Date(r.date) }));
-    const sortedPetrols = petrols.map(p => ({ ...p, type: "petrol", date: new Date(p.date) }));
-    const all = [...sortedReserves, ...sortedPetrols].sort((a, b) => a.date - b.date);
+    // Convert all date strings to real Date objects and tag type
+    const taggedReserves = reserves.map(r => ({
+      ...r,
+      type: "reserve",
+      dateObj: new Date(r.date),
+      km: parseFloat(r.km)
+    }));
 
-    // Find the latest Reserve → Petrol → Reserve sequence
-    let latestLog = null;
-    for (let i = 0; i < all.length - 2; i++) {
+    const taggedPetrols = petrols.map(p => ({
+      ...p,
+      type: "petrol",
+      dateObj: new Date(p.date),
+      litres: parseFloat(p.litres),
+      km: parseFloat(p.km)
+    }));
+
+    const allLogs = [...taggedReserves, ...taggedPetrols].sort(
+      (a, b) => a.dateObj - b.dateObj
+    );
+
+    let latest = null;
+
+    for (let i = 0; i < allLogs.length - 2; i++) {
+      const first = allLogs[i];
+      const second = allLogs[i + 1];
+      const third = allLogs[i + 2];
+
       if (
-        all[i].type === "reserve" &&
-        all[i + 1].type === "petrol" &&
-        all[i + 2].type === "reserve"
+        first.type === "reserve" &&
+        second.type === "petrol" &&
+        third.type === "reserve"
       ) {
-        const before = all[i];
-        const petrol = all[i + 1];
-        const after = all[i + 2];
+        const distance = third.km - first.km;
+        const mileage =
+          second.litres && distance > 0
+            ? (distance / second.litres).toFixed(2)
+            : "N/A";
 
-        const distance = after.km - before.km;
-        const mileage = petrol.litres
-          ? (distance / parseFloat(petrol.litres)).toFixed(2)
-          : "N/A";
-
-        latestLog = {
-          beforeReserveKm: before.km,
-          petrolLitres: petrol.litres,
-          afterReserveKm: after.km,
-          mileage
+        latest = {
+          beforeReserveKm: first.km,
+          petrolLitres: second.litres,
+          afterReserveKm: third.km,
+          mileage,
         };
       }
     }
 
-    setLog(latestLog);
+    setLog(latest);
   }, []);
 
   return (

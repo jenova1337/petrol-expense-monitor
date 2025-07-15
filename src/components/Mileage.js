@@ -1,98 +1,72 @@
-// src/components/Mileage.js
 import React, { useEffect, useState } from "react";
 
 const Mileage = () => {
-  const [mileageLogs, setMileageLogs] = useState([]);
+  const [log, setLog] = useState(null); // Only one latest mileage log
 
   useEffect(() => {
     const reserves = JSON.parse(localStorage.getItem("reserveLogs")) || [];
     const petrols = JSON.parse(localStorage.getItem("petrolLogs")) || [];
 
-    const sortedReserves = reserves.map((r) => ({
-      ...r,
-      type: "reserve",
-      km: parseFloat(r.km),
-      date: new Date(r.date),
-    }));
+    // Sort all by date
+    const sortedReserves = reserves.map(r => ({ ...r, type: "reserve", date: new Date(r.date) }));
+    const sortedPetrols = petrols.map(p => ({ ...p, type: "petrol", date: new Date(p.date) }));
+    const all = [...sortedReserves, ...sortedPetrols].sort((a, b) => a.date - b.date);
 
-    const sortedPetrols = petrols.map((p) => ({
-      ...p,
-      type: "petrol",
-      km: parseFloat(p.km),
-      litres: parseFloat(p.litres),
-      date: new Date(p.date),
-    }));
-
-    const all = [...sortedReserves, ...sortedPetrols].sort(
-      (a, b) => a.date - b.date
-    );
-
-    const logs = [];
+    // Find the latest Reserve → Petrol → Reserve sequence
+    let latestLog = null;
     for (let i = 0; i < all.length - 2; i++) {
       if (
         all[i].type === "reserve" &&
         all[i + 1].type === "petrol" &&
         all[i + 2].type === "reserve"
       ) {
-        const beforeReserve = all[i];
+        const before = all[i];
         const petrol = all[i + 1];
-        const afterReserve = all[i + 2];
+        const after = all[i + 2];
 
-        const distance = afterReserve.km - beforeReserve.km;
-        const mileage =
-          petrol.litres && petrol.litres !== 0
-            ? (distance / petrol.litres).toFixed(2)
-            : "N/A";
+        const distance = after.km - before.km;
+        const mileage = petrol.litres
+          ? (distance / parseFloat(petrol.litres)).toFixed(2)
+          : "N/A";
 
-        logs.push({
-          date: afterReserve.date.toLocaleString(),
-          bike: petrol.bike,
-          beforeReserveKm: beforeReserve.km,
-          petrolKm: petrol.km,
-          afterReserveKm: afterReserve.km,
-          litres: petrol.litres,
-          mileage,
-        });
+        latestLog = {
+          beforeReserveKm: before.km,
+          petrolLitres: petrol.litres,
+          afterReserveKm: after.km,
+          mileage
+        };
       }
     }
 
-    setMileageLogs(logs);
+    setLog(latestLog);
   }, []);
 
   return (
     <div style={{ padding: 20 }}>
       <h3>📊 Mileage Report</h3>
-      {mileageLogs.length === 0 ? (
-        <p>No mileage data to show. Add at least Reserve → Petrol → Reserve.</p>
-      ) : (
+      {log ? (
         <table border="1" cellPadding="6" style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr>
               <th>S.No</th>
-              <th>Date</th>
-              <th>Bike</th>
-              <th>Before Reserve (Km)</th>
-              <th>Petrol Fill (Km)</th>
-              <th>After Reserve (Km)</th>
-              <th>Litres</th>
-              <th>Mileage (Km/L)</th>
+              <th>Before Petrol Reserved KM</th>
+              <th>Petrol Poured (Litres)</th>
+              <th>After Petrol Reserved KM</th>
+              <th>Mileage (km/l)</th>
             </tr>
           </thead>
           <tbody>
-            {mileageLogs.map((entry, idx) => (
-              <tr key={idx}>
-                <td>{idx + 1}</td>
-                <td>{entry.date}</td>
-                <td>{entry.bike}</td>
-                <td>{entry.beforeReserveKm}</td>
-                <td>{entry.petrolKm}</td>
-                <td>{entry.afterReserveKm}</td>
-                <td>{entry.litres}</td>
-                <td>{entry.mileage}</td>
-              </tr>
-            ))}
+            <tr>
+              <td>1</td>
+              <td>{log.beforeReserveKm}</td>
+              <td>{log.petrolLitres}</td>
+              <td>{log.afterReserveKm}</td>
+              <td>{log.mileage}</td>
+            </tr>
           </tbody>
         </table>
+      ) : (
+        <p>No valid Reserve → Petrol → Reserve sequence found.</p>
       )}
     </div>
   );

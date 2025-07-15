@@ -1,4 +1,3 @@
-// src/components/Mileage.js
 import React, { useEffect, useState } from "react";
 
 const Mileage = () => {
@@ -8,13 +7,15 @@ const Mileage = () => {
     const reserves = JSON.parse(localStorage.getItem("reserveLogs")) || [];
     const petrols = JSON.parse(localStorage.getItem("petrolLogs")) || [];
 
-    const sortedReserves = reserves.map(r => ({ ...r, type: "reserve" }));
-    const sortedPetrols = petrols.map(p => ({ ...p, type: "petrol" }));
+    // Tag types for sorting and sequencing
+    const sortedReserves = reserves.map((r) => ({ ...r, type: "reserve" }));
+    const sortedPetrols = petrols.map((p) => ({ ...p, type: "petrol" }));
     const all = [...sortedReserves, ...sortedPetrols].sort(
       (a, b) => new Date(a.date) - new Date(b.date)
     );
 
     const logs = [];
+
     for (let i = 0; i < all.length - 2; i++) {
       if (
         all[i].type === "reserve" &&
@@ -25,16 +26,22 @@ const Mileage = () => {
         const petrol = all[i + 1];
         const afterReserve = all[i + 2];
 
-        const distance = afterReserve.km - beforeReserve.km;
-        const mileage = petrol.liters ? (distance / petrol.liters).toFixed(2) : "N/A";
+        // Ensure numeric values
+        const beforeKm = parseFloat(beforeReserve.km);
+        const afterKm = parseFloat(afterReserve.km);
+        const petrolKm = parseFloat(petrol.km);
+        const litres = parseFloat(petrol.litres);
+
+        const distance = afterKm - beforeKm;
+        const mileage = litres ? (distance / litres).toFixed(2) : "N/A";
 
         logs.push({
           date: new Date(afterReserve.date).toLocaleString(),
           bike: petrol.bike,
-          beforeReserveKm: beforeReserve.km,
-          petrolKm: petrol.km,
-          afterReserveKm: afterReserve.km,
-          liters: petrol.liters,
+          beforeReserveKm: beforeKm,
+          petrolKm: petrolKm,
+          afterReserveKm: afterKm,
+          litres,
           mileage,
         });
       }
@@ -71,7 +78,7 @@ const Mileage = () => {
                 <td>{entry.beforeReserveKm}</td>
                 <td>{entry.petrolKm}</td>
                 <td>{entry.afterReserveKm}</td>
-                <td>{entry.liters}</td>
+                <td>{entry.litres}</td>
                 <td>{entry.mileage}</td>
               </tr>
             ))}
@@ -82,4 +89,3 @@ const Mileage = () => {
   );
 };
 
-export default Mileage;

@@ -8,10 +8,23 @@ const Mileage = () => {
     const reserves = JSON.parse(localStorage.getItem("reserveLogs")) || [];
     const petrols = JSON.parse(localStorage.getItem("petrolLogs")) || [];
 
-    const sortedReserves = reserves.map(r => ({ ...r, type: "reserve" }));
-    const sortedPetrols = petrols.map(p => ({ ...p, type: "petrol" }));
+    const sortedReserves = reserves.map((r) => ({
+      ...r,
+      type: "reserve",
+      km: parseFloat(r.km),
+      date: new Date(r.date),
+    }));
+
+    const sortedPetrols = petrols.map((p) => ({
+      ...p,
+      type: "petrol",
+      km: parseFloat(p.km),
+      litres: parseFloat(p.litres),
+      date: new Date(p.date),
+    }));
+
     const all = [...sortedReserves, ...sortedPetrols].sort(
-      (a, b) => new Date(a.date) - new Date(b.date)
+      (a, b) => a.date - b.date
     );
 
     const logs = [];
@@ -25,16 +38,19 @@ const Mileage = () => {
         const petrol = all[i + 1];
         const afterReserve = all[i + 2];
 
-        const distance = parseFloat(afterReserve.km) - parseFloat(beforeReserve.km);
-        const mileage = petrol.litres ? (distance / petrol.litres).toFixed(2) : "N/A";
+        const distance = afterReserve.km - beforeReserve.km;
+        const mileage =
+          petrol.litres && petrol.litres !== 0
+            ? (distance / petrol.litres).toFixed(2)
+            : "N/A";
 
         logs.push({
-          date: new Date(afterReserve.date).toLocaleString(),
+          date: afterReserve.date.toLocaleString(),
           bike: petrol.bike,
           beforeReserveKm: beforeReserve.km,
           petrolKm: petrol.km,
           afterReserveKm: afterReserve.km,
-          liters: petrol.litres,
+          litres: petrol.litres,
           mileage,
         });
       }
@@ -49,7 +65,7 @@ const Mileage = () => {
       {mileageLogs.length === 0 ? (
         <p>No mileage data to show. Add at least Reserve → Petrol → Reserve.</p>
       ) : (
-        <table border="1" cellPadding="6" style={{ borderCollapse: "collapse", width: "100%" }}>
+        <table border="1" cellPadding="6" style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr>
               <th>S.No</th>
@@ -71,7 +87,7 @@ const Mileage = () => {
                 <td>{entry.beforeReserveKm}</td>
                 <td>{entry.petrolKm}</td>
                 <td>{entry.afterReserveKm}</td>
-                <td>{entry.liters}</td>
+                <td>{entry.litres}</td>
                 <td>{entry.mileage}</td>
               </tr>
             ))}

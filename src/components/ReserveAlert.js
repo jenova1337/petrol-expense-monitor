@@ -19,8 +19,12 @@ const ReserveAlert = () => {
     localStorage.setItem("reserveLogs", JSON.stringify(updated));
     localStorage.setItem("alertTime", alertTime);
     setLogs(updated);
-    alert("✅ Reserve alert saved!");
     setReserveKm("");
+
+    // Update mileage constants
+    const mileageConstants = JSON.parse(localStorage.getItem("mileageConstants")) || [];
+    mileageConstants.push({ type: "reserve", km: parseFloat(reserveKm), date: new Date().toISOString() });
+    localStorage.setItem("mileageConstants", JSON.stringify(mileageConstants));
   };
 
   return (
@@ -31,15 +35,10 @@ const ReserveAlert = () => {
         placeholder="Reserve Kilometers"
         value={reserveKm}
         onChange={(e) => setReserveKm(e.target.value)}
-        style={{ marginBottom: 10 }}
       />
       <br />
       <label>Alert me after: </label>
-      <select
-        value={alertTime}
-        onChange={(e) => setAlertTime(e.target.value)}
-        style={{ marginBottom: 10 }}
-      >
+      <select value={alertTime} onChange={(e) => setAlertTime(e.target.value)}>
         <option value="6">6 hrs</option>
         <option value="12">12 hrs</option>
         <option value="24">24 hrs</option>

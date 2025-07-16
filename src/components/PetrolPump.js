@@ -1,4 +1,3 @@
-// src/components/PetrolPump.js
 import React, { useState, useEffect } from "react";
 
 const PetrolPump = () => {
@@ -38,7 +37,15 @@ const PetrolPump = () => {
     localStorage.setItem("petrolLogs", JSON.stringify(updatedLog));
     setLog(updatedLog);
 
-    // Reset
+    const mileageConstants = JSON.parse(localStorage.getItem("mileageConstants")) || [];
+    mileageConstants.push({
+      type: "petrol",
+      litres: parseFloat(litres),
+      km: parseFloat(km),
+      date: new Date().toISOString(),
+    });
+    localStorage.setItem("mileageConstants", JSON.stringify(mileageConstants));
+
     setBike("");
     setRate("");
     setAmount("");

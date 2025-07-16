@@ -19,47 +19,55 @@ const ReserveAlert = () => {
     const updated = [...logs, newEntry];
     localStorage.setItem("reserveLogs", JSON.stringify(updated));
     localStorage.setItem("alertTime", alertTime);
+
+    // ✅ Save to mileageConstants as reserve
+    const mileage = JSON.parse(localStorage.getItem("mileageConstants")) || {};
+    mileage.lastReserve = newEntry;
+    localStorage.setItem("mileageConstants", JSON.stringify(mileage));
+
     setLogs(updated);
-    setReserveKm("");
-
-    // Also push into mileageConstants
-    const mileageLog = JSON.parse(localStorage.getItem("mileageConstants")) || [];
-    mileageLog.push({
-      type: "reserve",
-      km: parseFloat(reserveKm),
-      date: new Date().toISOString(),
-    });
-    localStorage.setItem("mileageConstants", JSON.stringify(mileageLog));
-
     alert("✅ Reserve alert saved!");
+    setReserveKm("");
   };
 
   return (
     <div style={{ padding: 20 }}>
       <h3>🔔 Reserve Details & Alert</h3>
+
       <input
         type="number"
         placeholder="Reserve Kilometers"
         value={reserveKm}
         onChange={(e) => setReserveKm(e.target.value)}
+        style={{ marginBottom: 10 }}
       />
+
       <br />
+
       <label>Alert me after: </label>
-      <select value={alertTime} onChange={(e) => setAlertTime(e.target.value)}>
+      <select
+        value={alertTime}
+        onChange={(e) => setAlertTime(e.target.value)}
+        style={{ marginBottom: 10 }}
+      >
         <option value="6">6 hrs</option>
         <option value="12">12 hrs</option>
         <option value="24">24 hrs</option>
       </select>
-      <br />
-      <button onClick={handleSave}>Save Reserve Alert</button>
 
-      <h4 style={{ marginTop: 20 }}>📘 Reserve Log History</h4>
+      <br />
+
+      <button style={{ marginTop: 10 }} onClick={handleSave}>
+        Save Reserve Alert
+      </button>
+
+      <h4 style={{ marginTop: 20 }}>📋 Reserve Log</h4>
       <table border="1" cellPadding="5">
         <thead>
           <tr>
             <th>S.No</th>
             <th>Date</th>
-            <th>Reserved KM</th>
+            <th>Reserve KM</th>
           </tr>
         </thead>
         <tbody>

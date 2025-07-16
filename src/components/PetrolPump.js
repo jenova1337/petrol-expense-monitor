@@ -23,6 +23,7 @@ const PetrolPump = () => {
     }
 
     const litres = (parseFloat(amount) / parseFloat(rate)).toFixed(2);
+
     const entry = {
       date: new Date().toLocaleString(),
       bike,
@@ -36,16 +37,10 @@ const PetrolPump = () => {
     localStorage.setItem("petrolLogs", JSON.stringify(updatedLog));
     setLog(updatedLog);
 
-    // Also push into mileageConstants
-    const mileageLog = JSON.parse(localStorage.getItem("mileageConstants")) || [];
-    mileageLog.push({
-      type: "petrol",
-      bike,
-      km: parseFloat(km),
-      litres: parseFloat(litres),
-      date: new Date().toISOString(),
-    });
-    localStorage.setItem("mileageConstants", JSON.stringify(mileageLog));
+    // ✅ Save to mileageConstants
+    const mileage = JSON.parse(localStorage.getItem("mileageConstants")) || {};
+    mileage.lastPetrol = entry;
+    localStorage.setItem("mileageConstants", JSON.stringify(mileage));
 
     setBike("");
     setRate("");
@@ -57,7 +52,11 @@ const PetrolPump = () => {
     <div style={{ padding: "20px" }}>
       <h3>⛽ Petrol Pump Log</h3>
 
-      <select value={bike} onChange={(e) => setBike(e.target.value)}>
+      <select
+        value={bike}
+        onChange={(e) => setBike(e.target.value)}
+        style={{ marginBottom: 10 }}
+      >
         <option value="">Select Bike</option>
         {bikes.map((b, i) => (
           <option key={i} value={b.name}>
@@ -65,15 +64,42 @@ const PetrolPump = () => {
           </option>
         ))}
       </select>
-      <br />
-      <input type="number" placeholder="Petrol Rate ₹" value={rate} onChange={(e) => setRate(e.target.value)} />
-      <br />
-      <input type="number" placeholder="Amount ₹" value={amount} onChange={(e) => setAmount(e.target.value)} />
-      <br />
-      <input type="number" placeholder="Current KM in Meter" value={km} onChange={(e) => setKm(e.target.value)} />
+
       <br />
 
-      <button onClick={handleSave}>Save</button>
+      <input
+        type="number"
+        placeholder="Petrol Rate ₹"
+        value={rate}
+        onChange={(e) => setRate(e.target.value)}
+        style={{ marginBottom: 10 }}
+      />
+
+      <br />
+
+      <input
+        type="number"
+        placeholder="Amount ₹"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        style={{ marginBottom: 10 }}
+      />
+
+      <br />
+
+      <input
+        type="number"
+        placeholder="Current KM in Meter"
+        value={km}
+        onChange={(e) => setKm(e.target.value)}
+        style={{ marginBottom: 10 }}
+      />
+
+      <br />
+
+      <button onClick={handleSave} style={{ marginTop: 10 }}>
+        Save
+      </button>
 
       {log.length > 0 && (
         <div style={{ marginTop: 20 }}>

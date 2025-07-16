@@ -7,26 +7,30 @@ const Mileage = () => {
     const reserveRaw = JSON.parse(localStorage.getItem("reserveLogs")) || [];
     const petrolRaw = JSON.parse(localStorage.getItem("petrolLogs")) || [];
 
-    // Parse dates and convert km, litres to numbers
-    const reserves = reserveRaw.map(r => ({
-      ...r,
-      type: "reserve",
-      date: new Date(r.date),
-      km: parseFloat(r.km),
-    }));
+    // Safely convert strings to numbers and parse dates
+    const reserves = reserveRaw
+      .filter(r => r.km && !isNaN(r.km))
+      .map(r => ({
+        ...r,
+        type: "reserve",
+        date: new Date(r.date),
+        km: Number(r.km), // important!
+      }));
 
-    const petrols = petrolRaw.map(p => ({
-      ...p,
-      type: "petrol",
-      date: new Date(p.date),
-      litres: parseFloat(p.litres),
-      km: parseFloat(p.km),
-    }));
+    const petrols = petrolRaw
+      .filter(p => p.km && p.litres && !isNaN(p.km) && !isNaN(p.litres))
+      .map(p => ({
+        ...p,
+        type: "petrol",
+        date: new Date(p.date),
+        litres: Number(p.litres),
+        km: Number(p.km),
+      }));
 
-    // Merge and sort
+    // Merge and sort by date
     const combined = [...reserves, ...petrols].sort((a, b) => a.date - b.date);
 
-    // Find latest valid Reserve → Petrol → Reserve sequence
+    // Look for latest valid R → P → R pattern
     for (let i = combined.length - 3; i >= 0; i--) {
       const a = combined[i];
       const b = combined[i + 1];
@@ -46,7 +50,7 @@ const Mileage = () => {
       }
     }
 
-    setLog(null); // No valid sequence
+    setLog(null); // No valid match found
   }, []);
 
   return (

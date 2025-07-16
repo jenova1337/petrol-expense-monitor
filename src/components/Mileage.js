@@ -43,3 +43,4 @@ const Mileage = () => {
     </div>
   );
 };
+export default Mileage;

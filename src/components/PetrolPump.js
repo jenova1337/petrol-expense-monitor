@@ -23,7 +23,6 @@ const PetrolPump = () => {
     }
 
     const litres = (parseFloat(amount) / parseFloat(rate)).toFixed(2);
-
     const entry = {
       date: new Date().toLocaleString(),
       bike,
@@ -37,14 +36,16 @@ const PetrolPump = () => {
     localStorage.setItem("petrolLogs", JSON.stringify(updatedLog));
     setLog(updatedLog);
 
-    const mileageConstants = JSON.parse(localStorage.getItem("mileageConstants")) || [];
-    mileageConstants.push({
+    // Also push into mileageConstants
+    const mileageLog = JSON.parse(localStorage.getItem("mileageConstants")) || [];
+    mileageLog.push({
       type: "petrol",
-      litres: parseFloat(litres),
+      bike,
       km: parseFloat(km),
+      litres: parseFloat(litres),
       date: new Date().toISOString(),
     });
-    localStorage.setItem("mileageConstants", JSON.stringify(mileageConstants));
+    localStorage.setItem("mileageConstants", JSON.stringify(mileageLog));
 
     setBike("");
     setRate("");
@@ -65,29 +66,11 @@ const PetrolPump = () => {
         ))}
       </select>
       <br />
-
-      <input
-        type="number"
-        placeholder="Petrol Rate ₹"
-        value={rate}
-        onChange={(e) => setRate(e.target.value)}
-      />
+      <input type="number" placeholder="Petrol Rate ₹" value={rate} onChange={(e) => setRate(e.target.value)} />
       <br />
-
-      <input
-        type="number"
-        placeholder="Amount ₹"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-      />
+      <input type="number" placeholder="Amount ₹" value={amount} onChange={(e) => setAmount(e.target.value)} />
       <br />
-
-      <input
-        type="number"
-        placeholder="Current KM in Meter"
-        value={km}
-        onChange={(e) => setKm(e.target.value)}
-      />
+      <input type="number" placeholder="Current KM in Meter" value={km} onChange={(e) => setKm(e.target.value)} />
       <br />
 
       <button onClick={handleSave}>Save</button>

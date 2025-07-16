@@ -4,12 +4,11 @@ const Mileage = () => {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    const constants = JSON.parse(localStorage.getItem("mileageConstants")) || [];
-    const sorted = constants
-      .map(e => ({ ...e, dateObj: new Date(e.date) }))
-      .sort((a, b) => a.dateObj - b.dateObj);
+    const data = JSON.parse(localStorage.getItem("mileageConstants")) || [];
 
-    const results = [];
+    const sorted = data.sort((a, b) => new Date(a.date) - new Date(b.date));
+    const mileageRows = [];
+
     for (let i = 0; i < sorted.length - 2; i++) {
       const a = sorted[i];
       const b = sorted[i + 1];
@@ -18,15 +17,17 @@ const Mileage = () => {
       if (a.type === "reserve" && b.type === "petrol" && c.type === "reserve") {
         const distance = c.km - a.km;
         const mileage = b.litres > 0 ? (distance / b.litres).toFixed(2) : "N/A";
-        results.push({
-          before: a.km,
-          litres: b.litres,
-          after: c.km,
+
+        mileageRows.push({
+          beforeReserve: a.km,
+          petrolLitres: b.litres,
+          afterReserve: c.km,
           mileage,
         });
       }
     }
-    setLogs(results);
+
+    setLogs(mileageRows);
   }, []);
 
   return (
@@ -37,20 +38,20 @@ const Mileage = () => {
           <thead>
             <tr>
               <th>S.No</th>
-              <th>Before Petrol Reserved KM</th>
+              <th>Before Reserve KM</th>
               <th>Petrol Poured (Litres)</th>
-              <th>After Petrol Reserved KM</th>
+              <th>After Reserve KM</th>
               <th>Mileage (km/l)</th>
             </tr>
           </thead>
           <tbody>
-            {logs.map((entry, i) => (
-              <tr key={i}>
-                <td>{i + 1}</td>
-                <td>{entry.before}</td>
-                <td>{entry.litres}</td>
-                <td>{entry.after}</td>
-                <td>{entry.mileage}</td>
+            {logs.map((row, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{row.beforeReserve}</td>
+                <td>{row.petrolLitres}</td>
+                <td>{row.afterReserve}</td>
+                <td>{row.mileage}</td>
               </tr>
             ))}
           </tbody>

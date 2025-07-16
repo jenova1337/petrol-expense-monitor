@@ -15,16 +15,23 @@ const ReserveAlert = () => {
       date: new Date().toLocaleString(),
       km: reserveKm,
     };
+
     const updated = [...logs, newEntry];
     localStorage.setItem("reserveLogs", JSON.stringify(updated));
     localStorage.setItem("alertTime", alertTime);
     setLogs(updated);
     setReserveKm("");
 
-    // Update mileage constants
-    const mileageConstants = JSON.parse(localStorage.getItem("mileageConstants")) || [];
-    mileageConstants.push({ type: "reserve", km: parseFloat(reserveKm), date: new Date().toISOString() });
-    localStorage.setItem("mileageConstants", JSON.stringify(mileageConstants));
+    // Also push into mileageConstants
+    const mileageLog = JSON.parse(localStorage.getItem("mileageConstants")) || [];
+    mileageLog.push({
+      type: "reserve",
+      km: parseFloat(reserveKm),
+      date: new Date().toISOString(),
+    });
+    localStorage.setItem("mileageConstants", JSON.stringify(mileageLog));
+
+    alert("✅ Reserve alert saved!");
   };
 
   return (
@@ -46,13 +53,13 @@ const ReserveAlert = () => {
       <br />
       <button onClick={handleSave}>Save Reserve Alert</button>
 
-      <h4 style={{ marginTop: 20 }}>📋 Reserve Log</h4>
+      <h4 style={{ marginTop: 20 }}>📘 Reserve Log History</h4>
       <table border="1" cellPadding="5">
         <thead>
           <tr>
             <th>S.No</th>
             <th>Date</th>
-            <th>Reserve KM</th>
+            <th>Reserved KM</th>
           </tr>
         </thead>
         <tbody>

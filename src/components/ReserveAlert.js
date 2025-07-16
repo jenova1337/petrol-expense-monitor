@@ -20,9 +20,20 @@ const ReserveAlert = () => {
     localStorage.setItem("reserveLogs", JSON.stringify(updated));
     localStorage.setItem("alertTime", alertTime);
 
-    // ✅ Save to mileageConstants as reserve
+    // ✅ Save to mileageConstants as reserve BEFORE or AFTER
     const mileage = JSON.parse(localStorage.getItem("mileageConstants")) || {};
-    mileage.lastReserve = newEntry;
+
+    if (!mileage.lastReserveBefore) {
+      mileage.lastReserveBefore = newEntry;
+    } else if (mileage.lastReserveBefore && mileage.lastPetrol && !mileage.lastReserveAfter) {
+      mileage.lastReserveAfter = newEntry;
+    } else {
+      // reset and start next calculation
+      mileage.lastReserveBefore = newEntry;
+      delete mileage.lastPetrol;
+      delete mileage.lastReserveAfter;
+    }
+
     localStorage.setItem("mileageConstants", JSON.stringify(mileage));
 
     setLogs(updated);

@@ -1,4 +1,3 @@
-// ✅ PetrolPump.js
 import React, { useState, useEffect } from "react";
 
 const PetrolPump = () => {
@@ -49,11 +48,17 @@ const PetrolPump = () => {
     setKm("");
   };
 
+  const totalAmount = log.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+
   return (
     <div style={{ padding: "20px" }}>
       <h3>⛽ Petrol Pump Log</h3>
 
-      <select value={bike} onChange={(e) => setBike(e.target.value)}>
+      <select
+        value={bike}
+        onChange={(e) => setBike(e.target.value)}
+        style={{ marginBottom: 10 }}
+      >
         <option value="">Select Bike</option>
         {bikes.map((b, i) => (
           <option key={i} value={b.name}>
@@ -68,6 +73,7 @@ const PetrolPump = () => {
         placeholder="Petrol Rate ₹"
         value={rate}
         onChange={(e) => setRate(e.target.value)}
+        style={{ marginBottom: 10 }}
       />
       <br />
 
@@ -76,6 +82,7 @@ const PetrolPump = () => {
         placeholder="Amount ₹"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
+        style={{ marginBottom: 10 }}
       />
       <br />
 
@@ -84,10 +91,50 @@ const PetrolPump = () => {
         placeholder="Current KM in Meter"
         value={km}
         onChange={(e) => setKm(e.target.value)}
+        style={{ marginBottom: 10 }}
       />
       <br />
 
-      <button onClick={handleSave}>Save</button>
+      <button onClick={handleSave} style={{ marginTop: 10 }}>
+        Save
+      </button>
+
+      <h4 style={{ marginTop: 20 }}>📋 Petrol Fill Log</h4>
+      {log.length > 0 ? (
+        <>
+          <table border="1" cellPadding="6" style={{ borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Bike</th>
+                <th>Rate ₹</th>
+                <th>Amount ₹</th>
+                <th>Litres</th>
+                <th>KM</th>
+              </tr>
+            </thead>
+            <tbody>
+              {log.map((entry, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>{entry.date}</td>
+                  <td>{entry.bike}</td>
+                  <td>{entry.rate}</td>
+                  <td>{entry.amount}</td>
+                  <td>{entry.litres}</td>
+                  <td>{entry.km}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p style={{ marginTop: 10 }}>
+            <strong>💰 Total Petrol ₹:</strong> ₹{totalAmount.toFixed(2)}
+          </p>
+        </>
+      ) : (
+        <p>📭 No petrol fill logs found.</p>
+      )}
     </div>
   );
 };
